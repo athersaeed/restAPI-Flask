@@ -17,7 +17,7 @@ class UserModel(db.Model):
     email = db.Column(db.String(80), unique=True, nullable=False)
 
     def __repr__(self):
-        return f"User(name = {self.name}, email = {self.name})"
+        return f"User(name = {self.name}, email = {self.email})"
     
 # validating data to make sure it is what we expect using request parser
 user_args = reqparse.RequestParser()
@@ -38,7 +38,7 @@ class Users(Resource):
         users = UserModel.query.all() # retrieving all users from the db
         return users
     
-    @marshal_with # shape the data you post from the post(self) function in the form defined using userFields
+    @marshal_with(userFields) # shape the data you post from the post(self) function in the form defined using userFields
 # this creates data using http post method similar to create in crud
     def post(self):
         args = user_args.parse_args() # parse the arguments with the definition that we set on line 24 and line 25 and if it doesn't parse correctly, it will automaticaly send back a response so no need to create edge cases
