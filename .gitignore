@@ -1,3 +1,6 @@
 .venv
 __pycahe__/
 *.pyc
+*.sqlite
+*.db
+/instance/

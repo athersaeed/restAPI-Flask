@@ -31,6 +31,7 @@ userFields = {
     'email':fields.String
 }
 
+# this class is for multiple users and the next one is for single users
 class Users(Resource):
     @marshal_with(userFields) # shape the data you get from the get(self) function in the form defined using userFields
 # this retrieves data using http get method similar to read in crud
@@ -48,8 +49,47 @@ class Users(Resource):
         users = UserModel.query.all() # retrieving all users from the db
         return users, 201
 
-# assigning class users with a url so when we send get request to our example.com/api/users/ the we should get all of the users returned to us
+# this class is for single users and the previous one is for multiple users
+class User(Resource):
+    @marshal_with(userFields) # shape the data you get from the get(self) function in the form defined using userFields
+# this retrieves data using http get method similar to read in crud but unlike the previous get(self) function this retrieves only one result where id = id
+    def get(self, id):
+        user = UserModel.query.filter_by(id=id).first()
+        if not user:
+            abort(404, "User not found")
+        return user
+    
+    @marshal_with(userFields) # shape the data you update get from the patch(self, id) function in the form defined using userFields
+# this updates data using http patch method similar to update in crud 
+    def patch(self, id):
+        args = user_args.parse_args() # parse the arguments with the definition that we set on line 24 and line 25 and if it doesn't parse correctly, it will automaticaly send back a response so no need to create edge cases
+        user = UserModel.query.filter_by(id=id).first()
+        if not user:
+            abort(404, "User not found")
+        user.name = args["name"]
+        user.email = args["email"]
+        db.session.commit()
+        return user
+    
+    @marshal_with(userFields) # shape the data you delete from the delete(self, id) function in the form defined using userFields
+# this deletes data using http delete method similar to delete in crud where id = id
+    def delete(self, id):
+        args = user_args.parse_args() # parse the arguments with the definition that we set on line 24 and line 25 and if it doesn't parse correctly, it will automaticaly send back a response so no need to create edge cases
+        user = UserModel.query.filter_by(id=id).first()
+        if not user:
+            abort(404, "User not found")
+        db.session.delete(user)
+        db.session.commit()
+        users = UserModel.query.all()
+        return users
+    
+
+
+
+# assigning class Esers with a url so when we send get request to our example.com/api/users/ then we should get all of the users returned to us
 api.add_resource(Users, '/api/users/')
+# assigning class User with a url so when we send get request to our example.com/api/users/<int:id> then we should get the user we requested returned to us
+api.add_resource(User, '/api/users/<int:id>')
 
 # setting up home route
 @app.route('/')
